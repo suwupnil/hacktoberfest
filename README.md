@@ -47,8 +47,8 @@ To eliminate cloud API costs, eliminate network latency, and guarantee mathemati
 │ 3. Local Edge LLM (Qwen 2.5 Coder)  │ Generates minimal reproduction scripts locally   │
 │    (Apple Metal GPU / Vulkan / CPU) │ via Ollama (500+ tokens/sec prompt eval).        │
 ├─────────────────────────────────────┼──────────────────────────────────────────────────┤
-│ 4. Native Vision & Keyframe OCR     │ Sub-20ms Apple Neural Engine OCR (Swift native)  │
-│    (Apple Silicon / Tesseract)      │ with OpenCV 3-keyframe video triage.             │
+│ 4. Native Vision & Keyframe OCR      │ Sub-20ms Apple Neural Engine OCR (Swift native)  │
+│    (Apple Silicon / Tesseract)       │ with OpenCV 3-keyframe video triage.             │
 └─────────────────────────────────────┴──────────────────────────────────────────────────┘
 ```
 
@@ -101,6 +101,15 @@ pytest tests/ -v
 ```bash
 python3 run.py
 ```
+
+Alternatively, use the Bash launcher:
+
+```bash
+bash run.sh
+```
+
+Both launchers honor the optional `HOST` and `PORT` environment variables, defaulting to `127.0.0.1:8000`.
+
 Open your browser and navigate to:  
 👉 **[http://127.0.0.1:8000](http://127.0.0.1:8000)**
 
