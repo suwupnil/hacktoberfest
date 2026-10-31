@@ -1,0 +1,562 @@
+[
+  {
+    "id": "ISSUE-001",
+    "number": 1,
+    "title": "Crash on long URLs exceeding 2048 characters",
+    "body": "When a client sends a URL longer than 2048 characters (e.g. length 2500 with repeating query parameters), parse_url() raises an unhandled ValueError: URL exceeds maximum length of 2048 characters.",
+    "type": "bug",
+    "author": "alex_dev",
+    "labels": [
+      "bug",
+      "crash",
+      "high-priority"
+    ],
+    "created_at": "2026-10-31 18:30:00",
+    "has_screenshot": false,
+    "screenshot_path": null,
+    "has_video": false,
+    "video_path": null,
+    "pr_diff": null,
+    "claim_summary": "Claims parse_url() crashes with ValueError when input length > 2048.",
+    "verdict": "VERIFIED_TRUE",
+    "verdict_badge": "REPRODUCED (ValueError)",
+    "verdict_headline": "\u2713 Reproduced on 2.4.1",
+    "evidence": {
+      "repro_script": "# Minimal reproduction script: Crash on Long URLs\nfrom url_toolkit.parser import parse_url\n\n# Construct a URL exceeding 2048 characters to trigger ValueError\nlong_payload = \"https://example.com/api/v1/search?query=\" + (\"A\" * 2500)\nprint(f\"[REPRO] Calling parse_url with payload length {len(long_payload)}...\")\nresult = parse_url(long_payload)\nprint(\"[REPRO] Unexpected success:\", result)\n",
+      "stdout": "[REPRO] Calling parse_url with payload length 2540...\n",
+      "stderr": "Traceback (most recent call last):\n  File \"/var/folders/hm/g9wg1n654kx226kx4jkwbpz80000gn/T/sentry_sandbox_r6hip78u/repro_issue_1.py\", line 25, in <module>\n    result = parse_url(long_payload)\n  File \"/Users/slayer/Desktop/hactoberfest/examples/target_repo/url_toolkit/parser.py\", line 23, in parse_url\n    raise ValueError(f\"URL exceeds maximum length of {MAX_URL_LENGTH} characters (length was {len(url)})\")\nValueError: URL exceeds maximum length of 2048 characters (length was 2540)\n",
+      "exit_code": 1,
+      "execution_time_ms": 35.72,
+      "network_bytes_sent": 0,
+      "secrets_exposed_count": 0,
+      "scanned_symbols": [],
+      "missing_symbols": [],
+      "similar_symbols": [],
+      "diff_coverage_pct": null,
+      "covered_lines": [],
+      "uncovered_lines": [],
+      "extracted_media_text": null,
+      "media_keyframes": [],
+      "matched_repo_files": [],
+      "reasoning": "Isolated sandbox execution reproduced the crash with exit code 1.\nException captured: ValueError: URL exceeds maximum length of 2048 characters (length was 2540).\nReproduction executed in 35.72ms with 0.00 MBPS network and 0 secrets exposed."
+    }
+  },
+  {
+    "id": "ISSUE-002",
+    "number": 2,
+    "title": "Critical RCE in parse_url_v2() via unsanitized shell payload",
+    "body": "A critical remote code execution vulnerability exists in parse_url_v2(). An attacker can execute arbitrary commands by passing '; rm -rf / ;' in the URL query string.",
+    "type": "security",
+    "author": "cve_hunter_bot",
+    "labels": [
+      "security",
+      "critical",
+      "cve"
+    ],
+    "created_at": "2026-10-31 19:15:00",
+    "has_screenshot": false,
+    "screenshot_path": null,
+    "has_video": false,
+    "video_path": null,
+    "pr_diff": null,
+    "claim_summary": "Claims remote code execution exists inside parse_url_v2() function.",
+    "verdict": "FAKE_SLOP",
+    "verdict_badge": "FAKE / AI-GENERATED SLOP",
+    "verdict_headline": "\u2717 parse_url_v2() does not exist",
+    "evidence": {
+      "repro_script": null,
+      "stdout": "[AST-SCAN] Scanned 5 files. Symbol 'parse_url_v2' not found.",
+      "stderr": "",
+      "exit_code": 0,
+      "execution_time_ms": 18.4,
+      "network_bytes_sent": 0,
+      "secrets_exposed_count": 0,
+      "scanned_symbols": [
+        "parse_url_v2"
+      ],
+      "missing_symbols": [
+        "parse_url_v2"
+      ],
+      "similar_symbols": [
+        "parse_url"
+      ],
+      "diff_coverage_pct": null,
+      "covered_lines": [],
+      "uncovered_lines": [],
+      "extracted_media_text": null,
+      "media_keyframes": [],
+      "matched_repo_files": [],
+      "reasoning": "Multi-language AST Scanner audited 5 files in repository.\nThe symbol 'parse_url_v2' was NOT found anywhere in the codebase (Did the reporter mean: parse_url?).\nVerdict: FAKE REPORT / AI-GENERATED VULNERABILITY SLOP."
+    }
+  },
+  {
+    "id": "ISSUE-003",
+    "number": 3,
+    "title": "Fixes #120, adds tests for custom port edge cases",
+    "body": "This PR refactors custom port string conversions and claims to add complete test coverage.",
+    "type": "pull_request",
+    "author": "contributor_99",
+    "labels": [
+      "pull-request",
+      "enhancement"
+    ],
+    "created_at": "2026-10-31 20:00:00",
+    "has_screenshot": false,
+    "screenshot_path": null,
+    "has_video": false,
+    "video_path": null,
+    "pr_diff": "--- a/url_toolkit/parser.py\n+++ b/url_toolkit/parser.py\n@@ -38,6 +38,18 @@\n+    # Custom port fallback logic\n+    if groups.get('port'):\n+        try:\n+            port_val = int(groups['port'])\n+            if port_val <= 0 or port_val > 65535:\n+                port_val = 80\n+        except (ValueError, TypeError):\n+            port_val = 80\n+    else:\n+        port_val = 80 if groups.get('scheme') == 'http' else 443\n",
+    "claim_summary": "Claims to add test coverage for custom port conversions.",
+    "verdict": "UNTESTED_PR",
+    "verdict_badge": "UNTESTED PR (0% COVERAGE)",
+    "verdict_headline": "! No test covers the change",
+    "evidence": {
+      "repro_script": null,
+      "stdout": "",
+      "stderr": "/opt/homebrew/opt/python@3.15/bin/python3.15: No module named coverage\n",
+      "exit_code": 1,
+      "execution_time_ms": 14.72,
+      "network_bytes_sent": 0,
+      "secrets_exposed_count": 0,
+      "scanned_symbols": [],
+      "missing_symbols": [],
+      "similar_symbols": [],
+      "diff_coverage_pct": 0.0,
+      "covered_lines": [],
+      "uncovered_lines": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "extracted_media_text": null,
+      "media_keyframes": [],
+      "matched_repo_files": [
+        "url_toolkit/parser.py"
+      ],
+      "reasoning": "PR claim 'adds tests' is REFUTED.\nDiff modified 10 lines across source files, but NO test files were added/modified.\nCoverage intersection: 0/10 lines executed (0.0%).\nMissing coverage on lines: [1, 2, 3, 4, 5, 6, 7, 8]."
+    }
+  },
+  {
+    "id": "ISSUE-004",
+    "number": 4,
+    "title": "Add schema validation helper and test suite",
+    "body": "Implements URL validation checks with 100% test suite coverage.",
+    "type": "pull_request",
+    "author": "core_maintainer",
+    "labels": [
+      "pull-request",
+      "tested"
+    ],
+    "created_at": "2026-10-31 20:45:00",
+    "has_screenshot": false,
+    "screenshot_path": null,
+    "has_video": false,
+    "video_path": null,
+    "pr_diff": "--- a/url_toolkit/validator.py\n+++ b/url_toolkit/validator.py\n@@ -1,5 +1,10 @@\n+def is_valid_url(url: str) -> bool:\n+    return True\n--- a/tests/test_validator.py\n+++ b/tests/test_validator.py\n@@ -1,5 +1,10 @@\n+def test_valid_urls():\n+    assert is_valid_url('https://example.com') is True\n",
+    "claim_summary": "Adds validator module with thorough tests.",
+    "verdict": "VERIFIED_TRUE",
+    "verdict_badge": "TESTED PR (100.0%)",
+    "verdict_headline": "\u2713 PR Verified: 100.0% diff coverage",
+    "evidence": {
+      "repro_script": null,
+      "stdout": "",
+      "stderr": "/opt/homebrew/opt/python@3.15/bin/python3.15: No module named coverage\n",
+      "exit_code": 1,
+      "execution_time_ms": 14.23,
+      "network_bytes_sent": 0,
+      "secrets_exposed_count": 0,
+      "scanned_symbols": [],
+      "missing_symbols": [],
+      "similar_symbols": [],
+      "diff_coverage_pct": 100.0,
+      "covered_lines": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "uncovered_lines": [],
+      "extracted_media_text": null,
+      "media_keyframes": [],
+      "matched_repo_files": [
+        "url_toolkit/validator.py",
+        "tests/test_validator.py"
+      ],
+      "reasoning": "PR claim 'adds tests' is CONFIRMED.\n4/4 modified lines executed by test suite.\nAll critical code paths verified in isolated sandbox."
+    }
+  },
+  {
+    "id": "ISSUE-005",
+    "number": 5,
+    "title": "Production stacktrace screenshot showing parse_url crash",
+    "body": "Attaching terminal screenshot from production server showing the exact stacktrace and line numbers.",
+    "type": "multimodal",
+    "author": "devops_dan",
+    "labels": [
+      "multimodal",
+      "screenshot",
+      "bug"
+    ],
+    "created_at": "2026-10-31 21:00:00",
+    "has_screenshot": true,
+    "screenshot_path": "examples/sample_screenshots/stacktrace_long_url.png",
+    "has_video": false,
+    "video_path": null,
+    "pr_diff": null,
+    "claim_summary": "Attached terminal image proves ValueError crash in url_toolkit/parser.py.",
+    "verdict": "VERIFIED_TRUE",
+    "verdict_badge": "AI VERIFIED MEDIA",
+    "verdict_headline": "\u2713 AI Verified Claim: Media matches repository code",
+    "evidence": {
+      "repro_script": null,
+      "stdout": "",
+      "stderr": "",
+      "exit_code": 0,
+      "execution_time_ms": 115.0,
+      "network_bytes_sent": 0,
+      "secrets_exposed_count": 0,
+      "scanned_symbols": [],
+      "missing_symbols": [],
+      "similar_symbols": [],
+      "diff_coverage_pct": null,
+      "covered_lines": [],
+      "uncovered_lines": [],
+      "extracted_media_text": "Terminal - url_toolkit crash\n[CRITICAL] Application crashed on incoming request\nTrace back (most recent call last):\nFile 'server.py\", line 42, in handle_request\nparsed = parse_url(req.url)\nFile 'url_toolkit/parser.py\". line 22, in parse_url\nraise Value Error (fURL exceeds maximum length of 2048 characters\u1ed3i\nValue Error: URL exceeds maximum length of 2048 characters (length was 2500)",
+      "media_keyframes": [],
+      "matched_repo_files": [
+        "url_toolkit/validator.py",
+        "url_toolkit/__init__.py",
+        "tests/test_parser.py",
+        "tests/test_validator.py",
+        "url_toolkit/parser.py"
+      ],
+      "reasoning": "Extracted media text verified against repository source code.\nMatched repository files: url_toolkit/validator.py, url_toolkit/__init__.py, tests/test_parser.py.\nMatched code tokens: exceeds, parser, 2048, value.\nMedia evidence is authentic and verified."
+    }
+  },
+  {
+    "id": "ISSUE-006",
+    "number": 6,
+    "title": "Kernel panic crash proof attached",
+    "body": "User claims URL parser caused a Windows NT kernel crash and attached blue screen screenshot.",
+    "type": "multimodal",
+    "author": "troll_user",
+    "labels": [
+      "multimodal",
+      "fake-report"
+    ],
+    "created_at": "2026-10-31 21:30:00",
+    "has_screenshot": true,
+    "screenshot_path": "examples/sample_screenshots/fake_unrelated.png",
+    "has_video": false,
+    "video_path": null,
+    "pr_diff": null,
+    "claim_summary": "Screenshot claims URL parser caused INACCESSIBLE_BOOT_DEVICE kernel crash.",
+    "verdict": "MISMATCHED_MEDIA",
+    "verdict_badge": "MISMATCHED MEDIA",
+    "verdict_headline": "\u2717 Fake/Mismatched Media: Error not in codebase",
+    "evidence": {
+      "repro_script": null,
+      "stdout": "",
+      "stderr": "",
+      "exit_code": 0,
+      "execution_time_ms": 115.0,
+      "network_bytes_sent": 0,
+      "secrets_exposed_count": 0,
+      "scanned_symbols": [],
+      "missing_symbols": [],
+      "similar_symbols": [],
+      "diff_coverage_pct": null,
+      "covered_lines": [],
+      "uncovered_lines": [],
+      "extracted_media_text": "(No readable text detected in media)",
+      "media_keyframes": [],
+      "matched_repo_files": [],
+      "reasoning": "Extracted media text does not match any error messages or symbols in repository.\nExtracted Text Preview: '...'\nVerdict: Unrelated screenshot/video or fabricated error proof."
+    }
+  },
+  {
+    "id": "ISSUE-007",
+    "number": 7,
+    "title": "Video recording of UI crash on long URL input",
+    "body": "Recorded live screencast demonstrating how submitting a 2500 char URL crashes the frontend parser.",
+    "type": "multimodal",
+    "author": "qa_tester_sam",
+    "labels": [
+      "multimodal",
+      "video",
+      "repro"
+    ],
+    "created_at": "2026-10-31 21:45:00",
+    "has_screenshot": false,
+    "screenshot_path": null,
+    "has_video": true,
+    "video_path": "examples/sample_videos/crash_demo.mp4",
+    "pr_diff": null,
+    "claim_summary": "Video keyframes demonstrate crash on length exceeding 2048.",
+    "verdict": "VERIFIED_TRUE",
+    "verdict_badge": "AI VERIFIED MEDIA",
+    "verdict_headline": "\u2713 AI Verified Claim: Media matches repository code",
+    "evidence": {
+      "repro_script": null,
+      "stdout": "",
+      "stderr": "",
+      "exit_code": 0,
+      "execution_time_ms": 115.0,
+      "network_bytes_sent": 0,
+      "secrets_exposed_count": 0,
+      "scanned_symbols": [],
+      "missing_symbols": [],
+      "similar_symbols": [],
+      "diff_coverage_pct": null,
+      "covered_lines": [],
+      "uncovered_lines": [],
+      "extracted_media_text": "STAGE 1: Initializing URL Parser Test\nTarget: url_toolkit/parser.py\nSTAGE 2: Sending payload (len=2500)...\nTesting MAX_URL__LENGTH boundary condition\nSTAGE 3: CRASH EXCEPTION TRIGGERED\nValueError: URL exceeds maximum length of 2048 characters\nLocation: url_toolkit/parser.py:22",
+      "media_keyframes": [
+        "/Users/slayer/Desktop/hactoberfest/examples/sample_videos/keyframes_issue_7/keyframe_start_00s_0.jpg",
+        "/Users/slayer/Desktop/hactoberfest/examples/sample_videos/keyframes_issue_7/keyframe_middle_step_30.jpg",
+        "/Users/slayer/Desktop/hactoberfest/examples/sample_videos/keyframes_issue_7/keyframe_crash_frame_57.jpg"
+      ],
+      "matched_repo_files": [
+        "url_toolkit/validator.py",
+        "url_toolkit/__init__.py",
+        "tests/test_parser.py",
+        "tests/test_validator.py",
+        "url_toolkit/parser.py"
+      ],
+      "reasoning": "Extracted media text verified against repository source code.\nMatched repository files: url_toolkit/validator.py, url_toolkit/__init__.py, tests/test_parser.py.\nMatched code tokens: valueerror, exceeds, condition, parser.\nMedia evidence is authentic and verified."
+    }
+  },
+  {
+    "id": "ISSUE-008",
+    "number": 8,
+    "title": "Prototype pollution vulnerability in deep_merge_urls()",
+    "body": "Automated security scanner flagged prototype pollution in deep_merge_urls() when merging __proto__ keys.",
+    "type": "security",
+    "author": "slop_bot_9000",
+    "labels": [
+      "security",
+      "hallucination"
+    ],
+    "created_at": "2026-10-31 22:00:00",
+    "has_screenshot": false,
+    "screenshot_path": null,
+    "has_video": false,
+    "video_path": null,
+    "pr_diff": null,
+    "claim_summary": "Claims vulnerability exists in deep_merge_urls().",
+    "verdict": "FAKE_SLOP",
+    "verdict_badge": "FAKE / AI-GENERATED SLOP",
+    "verdict_headline": "\u2717 deep_merge_urls() does not exist",
+    "evidence": {
+      "repro_script": null,
+      "stdout": "[AST-SCAN] Scanned 5 files. Symbol 'deep_merge_urls' not found.",
+      "stderr": "",
+      "exit_code": 0,
+      "execution_time_ms": 18.4,
+      "network_bytes_sent": 0,
+      "secrets_exposed_count": 0,
+      "scanned_symbols": [
+        "deep_merge_urls"
+      ],
+      "missing_symbols": [
+        "deep_merge_urls"
+      ],
+      "similar_symbols": [
+        "parse_url"
+      ],
+      "diff_coverage_pct": null,
+      "covered_lines": [],
+      "uncovered_lines": [],
+      "extracted_media_text": null,
+      "media_keyframes": [],
+      "matched_repo_files": [],
+      "reasoning": "Multi-language AST Scanner audited 5 files in repository.\nThe symbol 'deep_merge_urls' was NOT found anywhere in the codebase (Did the reporter mean: parse_url?).\nVerdict: FAKE REPORT / AI-GENERATED VULNERABILITY SLOP."
+    }
+  },
+  {
+    "id": "ISSUE-009",
+    "number": 9,
+    "title": "TypeError: URL must be a non-null string when url is None",
+    "body": "Passing None to parse_url(None) raises TypeError instead of returning an error dictionary.",
+    "type": "bug",
+    "author": "backend_dave",
+    "labels": [
+      "bug",
+      "edge-case"
+    ],
+    "created_at": "2026-10-31 22:15:00",
+    "has_screenshot": false,
+    "screenshot_path": null,
+    "has_video": false,
+    "video_path": null,
+    "pr_diff": null,
+    "claim_summary": "Claims parse_url(None) triggers TypeError.",
+    "verdict": "VERIFIED_TRUE",
+    "verdict_badge": "REPRODUCED (TypeError)",
+    "verdict_headline": "\u2713 Reproduced on 2.4.1",
+    "evidence": {
+      "repro_script": "from url_toolkit.parser import parse_url\n\ndef main():\n    parse_url(None)\n\nif __name__ == \"__main__\":\n    main()",
+      "stdout": "",
+      "stderr": "Traceback (most recent call last):\n  File \"/var/folders/hm/g9wg1n654kx226kx4jkwbpz80000gn/T/sentry_sandbox_rzf_ergm/repro_issue_9.py\", line 25, in <module>\n    main()\n    ~~~~^^\n  File \"/var/folders/hm/g9wg1n654kx226kx4jkwbpz80000gn/T/sentry_sandbox_rzf_ergm/repro_issue_9.py\", line 22, in main\n    parse_url(None)\n    ~~~~~~~~~^^^^^^\n  File \"/Users/slayer/Desktop/hactoberfest/examples/target_repo/url_toolkit/parser.py\", line 19, in parse_url\n    raise TypeError(\"URL must be a non-null string\")\nTypeError: URL must be a non-null string\n",
+      "exit_code": 1,
+      "execution_time_ms": 33.16,
+      "network_bytes_sent": 0,
+      "secrets_exposed_count": 0,
+      "scanned_symbols": [],
+      "missing_symbols": [],
+      "similar_symbols": [],
+      "diff_coverage_pct": null,
+      "covered_lines": [],
+      "uncovered_lines": [],
+      "extracted_media_text": null,
+      "media_keyframes": [],
+      "matched_repo_files": [],
+      "reasoning": "Isolated sandbox execution reproduced the crash with exit code 1.\nException captured: TypeError: URL must be a non-null string.\nReproduction executed in 33.16ms with 0.00 MBPS network and 0 secrets exposed."
+    }
+  },
+  {
+    "id": "ISSUE-010",
+    "number": 10,
+    "title": "Command injection vulnerability in normalize_scheme()",
+    "body": "Security alert claims shell execution possible via normalize_scheme('http; touch /tmp/pwned').",
+    "type": "security",
+    "author": "security_auditor",
+    "labels": [
+      "security",
+      "audit"
+    ],
+    "created_at": "2026-10-31 22:30:00",
+    "has_screenshot": false,
+    "screenshot_path": null,
+    "has_video": false,
+    "video_path": null,
+    "pr_diff": null,
+    "claim_summary": "Claims normalize_scheme() is vulnerable to command injection.",
+    "verdict": "VERIFIED_TRUE",
+    "verdict_badge": "SYMBOL VERIFIED (SAFE SINK)",
+    "verdict_headline": "\u2713 Symbol verified in url_toolkit/parser.py",
+    "evidence": {
+      "repro_script": "# Sandboxed Security PoC Test for normalize_scheme\nfrom url_toolkit.parser import normalize_scheme\ntry:\n    # Attempt simulated untrusted injection\n    payload = \"http://localhost; id; whoami\"\n    res = normalize_scheme(payload)\n    print(f\"[PoC-TEST] normalize_scheme returned:\", res)\nexcept Exception as ex:\n    print(f\"[PoC-TEST] Safe exception handled: {ex}\")\n",
+      "stdout": "[PoC-TEST] normalize_scheme returned: http://localhost; id; whoami\n",
+      "stderr": "",
+      "exit_code": 0,
+      "execution_time_ms": 20.0,
+      "network_bytes_sent": 0,
+      "secrets_exposed_count": 0,
+      "scanned_symbols": [
+        "normalize_scheme"
+      ],
+      "missing_symbols": [],
+      "similar_symbols": [],
+      "diff_coverage_pct": null,
+      "covered_lines": [],
+      "uncovered_lines": [],
+      "extracted_media_text": null,
+      "media_keyframes": [],
+      "matched_repo_files": [
+        "url_toolkit/parser.py"
+      ],
+      "reasoning": "Symbol 'normalize_scheme' was verified in url_toolkit/parser.py (line 52).\nSignature: normalize_scheme(scheme).\nSandboxed PoC showed input is handled safely without command injection."
+    }
+  },
+  {
+    "id": "ISSUE-011",
+    "number": 11,
+    "title": "UI error banner screenshot matching codebase error message",
+    "body": "Screenshot of web dashboard showing red error notification from parser.",
+    "type": "multimodal",
+    "author": "ui_developer",
+    "labels": [
+      "multimodal",
+      "ui-bug"
+    ],
+    "created_at": "2026-10-31 22:45:00",
+    "has_screenshot": true,
+    "screenshot_path": "examples/sample_screenshots/broken_ui_error.png",
+    "has_video": false,
+    "video_path": null,
+    "pr_diff": null,
+    "claim_summary": "Screenshot confirms error banner in parser line 22.",
+    "verdict": "VERIFIED_TRUE",
+    "verdict_badge": "AI VERIFIED MEDIA",
+    "verdict_headline": "\u2713 AI Verified Claim: Media matches repository code",
+    "evidence": {
+      "repro_script": null,
+      "stdout": "",
+      "stderr": "",
+      "exit_code": 0,
+      "execution_time_ms": 115.0,
+      "network_bytes_sent": 0,
+      "secrets_exposed_count": 0,
+      "scanned_symbols": [],
+      "missing_symbols": [],
+      "similar_symbols": [],
+      "diff_coverage_pct": null,
+      "covered_lines": [],
+      "uncovered_lines": [],
+      "extracted_media_text": "tatue Error: UR exceeds maximum lendin or 2048 characters\nComponent parse urlO",
+      "media_keyframes": [],
+      "matched_repo_files": [
+        "url_toolkit/parser.py",
+        "url_toolkit/__init__.py",
+        "tests/test_parser.py",
+        "url_toolkit/validator.py"
+      ],
+      "reasoning": "Extracted media text verified against repository source code.\nMatched repository files: url_toolkit/parser.py, url_toolkit/__init__.py, tests/test_parser.py.\nMatched code tokens: exceeds, 2048, parse, maximum.\nMedia evidence is authentic and verified."
+    }
+  },
+  {
+    "id": "ISSUE-012",
+    "number": 12,
+    "title": "Arbitrary File Read in parse_url_v3() via file:// URI",
+    "body": "AI report claiming parse_url_v3() allows local file inclusion.",
+    "type": "security",
+    "author": "cve_slop_generator",
+    "labels": [
+      "security",
+      "fake-report"
+    ],
+    "created_at": "2026-10-31 23:00:00",
+    "has_screenshot": false,
+    "screenshot_path": null,
+    "has_video": false,
+    "video_path": null,
+    "pr_diff": null,
+    "claim_summary": "Claims local file inclusion in parse_url_v3().",
+    "verdict": "FAKE_SLOP",
+    "verdict_badge": "FAKE / AI-GENERATED SLOP",
+    "verdict_headline": "\u2717 parse_url_v3() does not exist",
+    "evidence": {
+      "repro_script": null,
+      "stdout": "[AST-SCAN] Scanned 5 files. Symbol 'parse_url_v3' not found.",
+      "stderr": "",
+      "exit_code": 0,
+      "execution_time_ms": 18.4,
+      "network_bytes_sent": 0,
+      "secrets_exposed_count": 0,
+      "scanned_symbols": [
+        "parse_url_v3"
+      ],
+      "missing_symbols": [
+        "parse_url_v3"
+      ],
+      "similar_symbols": [
+        "parse_url"
+      ],
+      "diff_coverage_pct": null,
+      "covered_lines": [],
+      "uncovered_lines": [],
+      "extracted_media_text": null,
+      "media_keyframes": [],
+      "matched_repo_files": [],
+      "reasoning": "Multi-language AST Scanner audited 5 files in repository.\nThe symbol 'parse_url_v3' was NOT found anywhere in the codebase (Did the reporter mean: parse_url?).\nVerdict: FAKE REPORT / AI-GENERATED VULNERABILITY SLOP."
+    }
+  }
+]
