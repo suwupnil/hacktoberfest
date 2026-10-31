@@ -1,0 +1,6 @@
+# The workflow must automatically:
+# Install the project and its dependencies.
+# Execute the relevant tests.
+# Validate the implementation.
+# Run on every pull request.
+# Complete successfully on the final submitted commit.
