@@ -18,8 +18,9 @@ BUG REPORT: "Crash on long URLs" ─────────┐
 SECURITY REPORT: "RCE in parse_url_v2()" ─┼────►│                   CLAIM-SENTRY GITHUB APP               │
                                           │     │  Air-Gapped Sandbox • Zero Network • Secrets Sanitized  │
 PULL REQUEST: "Fixes #120, adds tests" ───┤     └────────────────────────────┬────────────────────────────┘
-                                          │                                  ▼
-MULTIMODAL: "Stacktrace screenshot" ──────┘                                  EVIDENCE DOSSIER & PLAIN LANGUAGE VERDICT
+                                          │                                  │
+MULTIMODAL: "Stacktrace screenshot" ──────┘                                  ▼
+                                                  EVIDENCE DOSSIER & PLAIN LANGUAGE VERDICT
                                                   ✓ Reproduced in Sandbox on v2.4.1 (exit code 1)
                                                   ✗ parse_url_v2() does NOT exist in codebase [FAKE SLOP]
                                                   ! No tests cover modified diff lines [UNTESTED PR]
