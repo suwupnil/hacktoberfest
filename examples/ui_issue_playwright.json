@@ -1,0 +1,8 @@
+{
+  "repo_url": "https://github.com/vercel/next.js",
+  "issue": {
+    "title": "Navigation drawer does not close when clicking overlay backdrop on mobile viewport",
+    "body": "### Description\nWhen opening the mobile drawer menu at viewport 375x667 and clicking the blurred backdrop overlay, the drawer stays open and blocks user interactions.\n\n### Steps to Reproduce\n1. Open application at /dashboard on mobile viewport.\n2. Click hamburger menu icon to open sidebar drawer.\n3. Click backdrop outside drawer.\n\n### Expected Behavior\nDrawer closes with slide-out animation and overlay opacity returns to 0.\n\n### Actual Behavior\nDrawer remains open; clicks on the backdrop do not trigger onClick event handler.",
+    "labels": ["ui", "frontend", "mobile"]
+  }
+}

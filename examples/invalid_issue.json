@@ -1,0 +1,8 @@
+{
+  "repo_url": "https://github.com/psf/requests",
+  "issue": {
+    "title": "Quantum encryption algorithm fails when requests.teleport() is invoked",
+    "body": "### Description\nCalling `requests.teleport('quantum://satellite')` causes a segmentation fault because the quantum entanglement module is not thread-safe.\n\n### Steps to Reproduce\nRun `requests.teleport()`.\n\n### Expected Behavior\nInstantly transmit HTTP packet over quantum entanglement.\n\n### Actual Behavior\nModule does not exist, claims impossible capabilities.",
+    "labels": ["bug", "invalid"]
+  }
+}

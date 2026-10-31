@@ -1,0 +1,9 @@
+{
+  "repo_url": "https://github.com/boostorg/boost",
+  "issue": {
+    "title": "boost::algorithm::unhex throws std::out_of_range on odd-length input strings instead of boost::algorithm::hex_decode_error",
+    "body": "### Description\nWhen decoding a hex-encoded string of odd length using `boost::algorithm::unhex`, the function attempts to read two characters at a time. On the final iteration, it accesses out of bounds of the input string and throws `std::out_of_range` instead of the documented domain exception `boost::algorithm::hex_decode_error` (with error code `not_enough_input`).\n\n### Steps to Reproduce\n1. Compile the following C++ snippet:\n```cpp\n#include <boost/algorithm/hex.hpp>\n#include <iostream>\n#include <string>\n\nint main() {\n    std::string input = \"48656c6c6\"; // 9 characters (odd length)\n    std::string output;\n    try {\n        boost::algorithm::unhex(input, std::back_inserter(output));\n        std::cout << \"Decoded: \" << output << std::endl;\n    } catch (const boost::algorithm::hex_decode_error& e) {\n        std::cout << \"Caught expected hex_decode_error: \" << e.what() << std::endl;\n        return 0;\n    } catch (const std::exception& e) {\n        std::cerr << \"Unexpected exception thrown: \" << e.what() << std::endl;\n        return 1;\n    }\n    return 0;\n}\n```\n2. Run the executable with odd-length hex input.\n\n### Expected Behavior\nThe function should validate the input length or catch boundary conditions and throw `boost::algorithm::hex_decode_error` with `boost::algorithm::not_enough_input`.\n\n### Actual Behavior\nThe program terminates with an unhandled `std::out_of_range` exception (or fails to catch it under `hex_decode_error`).",
+    "labels": ["bug", "algorithm"],
+    "is_ui": false
+  }
+}

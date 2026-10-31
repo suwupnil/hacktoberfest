@@ -1,0 +1,8 @@
+{
+  "repo_url": "https://github.com/psf/requests",
+  "issue": {
+    "title": "requests.utils.parse_dict_header returns malformed dictionary when header contains unquoted semicolons in cookie string",
+    "body": "### Description\nWhen parsing a header with `parse_dict_header`, if a value contains an unquoted semicolon, the parser splits on semicolon prematurely and corrupts the resulting key-value pairs.\n\n### Steps to Reproduce\n```python\nfrom requests.utils import parse_dict_header\nheader = 'foo=bar; baz=qux; extra=value'\nres = parse_dict_header(header)\nprint(res)\n```\n\n### Expected Behavior\nProperly parses all key-value items into a dictionary.\n\n### Actual Behavior\nKeys with unquoted values get mangled or stripped.",
+    "labels": ["bug", "headers"]
+  }
+}
