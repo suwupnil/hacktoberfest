@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CLAIM-SENTRY // Problem 2: Triage That Tests The Claims</title>
+  <link rel="stylesheet" href="/static/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- CLEAN HEADER -->
+  <header class="header-box">
+    <h1 class="header-title">⚡ CLAIM-SENTRY // TRIAGE THAT TESTS THE CLAIMS</h1>
+    <p class="header-subtitle">
+      Hacktoberfest HackDay Sonipat • 100% Local AI Sandbox (Apple Silicon M5 Metal GPU) • Zero Cloud APIs
+    </p>
+  </header>
+
+  <!-- SEARCH & START BAR -->
+  <section class="search-container">
+    <div class="search-input-group">
+      <input 
+        type="text" 
+        class="search-input" 
+        id="repo-url-input" 
+        placeholder="Paste any GitHub repository link (e.g. https://github.com/Newton-School/grauity)..." 
+        value="https://github.com/Newton-School/grauity"
+      >
+      <button class="btn-start" id="btn-start-triage">⚡ START TRIAGE</button>
+    </div>
+    <div class="repo-suggestions">
+      <span style="font-weight: 800; color: #555;">QUICK REPOS:</span>
+      <button class="suggestion-chip" id="chip-grauity">🎓 Newton-School/grauity</button>
+      <button class="suggestion-chip" id="chip-flask">🌶️ pallets/flask</button>
+      <button class="suggestion-chip" id="chip-httpx">⚡ encode/httpx</button>
+      <button class="suggestion-chip" id="chip-sample">🧪 url-toolkit (Sample Suite)</button>
+    </div>
+  </section>
+
+  <!-- SPLIT SCREEN: LIVE TERMINAL & TRIAGE BOARD -->
+  <main class="main-grid">
+    <!-- LEFT: LIVE THINKING TERMINAL -->
+    <section class="terminal-card">
+      <div class="terminal-header">
+        <span class="terminal-title">[LIVE SANDBOX RUNNER // SSE LOGS]</span>
+        <span style="font-size: 11px; color: var(--neon-green); font-weight: 800;">AIR-GAPPED 🔒</span>
+      </div>
+      <div class="terminal-body" id="terminal-logs">
+        <div class="log-line">
+          <span class="log-timestamp">[00:00:00]</span>
+          <span class="log-tag tag-SANDBOX">SANDBOX</span>
+          <span>ClaimSentry engine ready. Qwen 2.5 Coder 7B active on Metal GPU. Air-gapped: 0.00 MBPS network.</span>
+        </div>
+        <div class="log-line">
+          <span class="log-timestamp">[00:00:01]</span>
+          <span class="log-tag tag-FETCH">FETCH</span>
+          <span>Paste a repository URL and click 'START TRIAGE' to test claims automatically.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT: TRIAGE BOARD WITH 3 SIMPLE FILTERS -->
+    <section class="board-card">
+      <div class="board-header">
+        <span class="board-title">TRIAGED CLAIMS (<span id="claims-count">0</span>)</span>
+        <div class="filter-tabs">
+          <button class="filter-btn active" data-filter="all" id="btn-filter-all">ALL (<span id="count-all">0</span>)</button>
+          <button class="filter-btn" data-filter="real" id="btn-filter-real" style="border-color: var(--neon-green);">✓ REAL ISSUES (<span id="count-real">0</span>)</button>
+          <button class="filter-btn" data-filter="fake" id="btn-filter-fake" style="border-color: var(--brutal-red);">✗ FAKE / UNVERIFIED (<span id="count-fake">0</span>)</button>
+        </div>
+      </div>
+      <div class="issues-container" id="issues-list">
+        <!-- Rendered dynamically by app.js -->
+      </div>
+    </section>
+  </main>
+
+  <!-- EVIDENCE MODAL DRAWER FOR TECHNICAL PROOF -->
+  <div class="modal-overlay" id="proof-modal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <span style="font-weight: 900; font-size: 14px;" id="proof-modal-title">TECHNICAL EVIDENCE PROOF</span>
+        <button class="btn-close" id="btn-close-modal">✕ CLOSE</button>
+      </div>
+      <div class="modal-body" id="proof-modal-content">
+        <!-- Filled dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

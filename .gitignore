@@ -1,2 +1,16 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.coverage
+htmlcov/
 .DS_Store
-skills/**
+*.egg-info/
+dist/
+build/
+.env
+local_repos/
+examples/sample_screenshots/gh_*
+*.swp
+*.swo
+
