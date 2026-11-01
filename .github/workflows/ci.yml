@@ -1,6 +1,54 @@
-# The workflow must automatically:
-# Install the project and its dependencies.
-# Execute the relevant tests.
-# Validate the implementation.
-# Run on every pull request.
-# Complete successfully on the final submitted commit.
+name: ClaimSentry CI
+
+on:
+  push:
+    branches: [ main, "feat/**" ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    name: Autonomous Triage Verification Suite
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install System Dependencies (OCR)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends tesseract-ocr tesseract-ocr-eng
+
+      - name: Install Python Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytesseract
+
+      - name: Execute Full Test Suite (20 Verification Tests)
+        run: |
+          pytest tests/ -v --durations=10
+
+      - name: Validate Server Implementation & Health Check
+        run: |
+          # Start ClaimSentry server in background
+          python run.py &
+          SERVER_PID=$!
+          sleep 3
+
+          # Validate status endpoint
+          curl -f -s http://127.0.0.1:8000/api/status | grep '"status":"ready"'
+
+          # Validate air-gapped security telemetry (zero network & zero secrets)
+          curl -f -s http://127.0.0.1:8000/api/telemetry | grep '"network_usage_mbps":0.0'
+          curl -f -s http://127.0.0.1:8000/api/telemetry | grep '"secrets_exposed":0'
+
+          # Terminate background server process
+          kill $SERVER_PID
