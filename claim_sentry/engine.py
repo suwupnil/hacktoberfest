@@ -26,7 +26,7 @@ class ClaimSentryEngine:
         self.llm = llm_engine or LocalLLMEngine()
         self.symbol_index = CodebaseSymbolIndex(self.repo_dir)
 
-        self.bug_verifier = BugVerifier(self.sandbox, self.llm)
+        self.bug_verifier = BugVerifier(self.sandbox, self.llm, symbol_index=self.symbol_index)
         self.security_verifier = SecurityVerifier(self.sandbox, self.symbol_index)
         self.diff_verifier = DiffCoverageVerifier(self.sandbox)
         self.multimodal_verifier = MultimodalVerifier(self.sandbox)
@@ -40,7 +40,7 @@ class ClaimSentryEngine:
         self.repo_dir = Path(new_repo_dir).resolve()
         self.sandbox = ExecutionSandbox(self.repo_dir)
         self.symbol_index = CodebaseSymbolIndex(self.repo_dir)
-        self.bug_verifier = BugVerifier(self.sandbox, self.llm)
+        self.bug_verifier = BugVerifier(self.sandbox, self.llm, symbol_index=self.symbol_index)
         self.security_verifier = SecurityVerifier(self.sandbox, self.symbol_index)
         self.diff_verifier = DiffCoverageVerifier(self.sandbox)
         self.multimodal_verifier = MultimodalVerifier(self.sandbox)
@@ -113,7 +113,9 @@ class ClaimSentryEngine:
         is_js_ts = any(f.endswith((".ts", ".tsx", ".js", ".jsx")) for f in self.symbol_index.scanned_files)
 
         # 1. How we tested
-        if issue.has_screenshot or issue.has_video or issue.type == IssueType.MULTIMODAL:
+        if issue.evidence and issue.evidence.lapse_detected:
+            issue.how_we_tested = "Initial sandbox test produced a testing lapse (unlinked/synthetic mock import). Adaptive Healing Workflow re-grounded the claim against in-memory AST and verified the defect/symbol."
+        elif issue.has_screenshot or issue.has_video or issue.type == IssueType.MULTIMODAL:
             issue.how_we_tested = "We extracted visual text and error messages using Apple Silicon Neural Engine OCR (and OpenCV keyframes for videos), then checked whether those exact error strings exist in the repository."
         elif issue.type == IssueType.SECURITY or "cve" in issue.title.lower() or "rce" in issue.title.lower():
             issue.how_we_tested = f"We scanned the Abstract Syntax Tree (AST) across all {files_count} files in the repository to check if the claimed vulnerable function or symbol actually exists."

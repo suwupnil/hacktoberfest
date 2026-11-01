@@ -19,10 +19,10 @@ def test_untested_pr_detected():
         type=IssueType.PULL_REQUEST,
         pr_diff="""--- a/url_toolkit/parser.py
 +++ b/url_toolkit/parser.py
-@@ -38,6 +38,18 @@
-+    # Custom port logic not covered by any test
-+    if groups.get('port'):
-+        port_val = int(groups['port'])
+@@ -100,6 +100,10 @@
++def parse_custom_socket_port(host_str: str) -> int:
++    # Untested custom port logic
++    return 8080
 """
     )
 
@@ -46,14 +46,15 @@ def test_tested_pr_verified():
         type=IssueType.PULL_REQUEST,
         pr_diff="""--- a/url_toolkit/validator.py
 +++ b/url_toolkit/validator.py
-@@ -1,5 +1,10 @@
+@@ -6,6 +6,6 @@
 +def is_valid_url(url: str) -> bool:
-+    return True
++    if not url or not isinstance(url, str):
++        return False
 --- a/tests/test_validator.py
 +++ b/tests/test_validator.py
-@@ -1,5 +1,10 @@
+@@ -6,6 +6,6 @@
 +def test_valid_urls():
-+    assert is_valid_url('https://example.com') is True
++    assert is_valid_url("https://example.com") is True
 """
     )
 
