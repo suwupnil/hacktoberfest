@@ -39,6 +39,8 @@ class Evidence(BaseModel):
     extracted_media_text: Optional[str] = None
     media_keyframes: List[str] = Field(default_factory=list)
     matched_repo_files: List[str] = Field(default_factory=list)
+    lapse_detected: bool = False
+    adaptive_workflow: Optional[str] = None
     reasoning: str = ""
 
 

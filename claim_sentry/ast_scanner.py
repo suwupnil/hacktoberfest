@@ -61,6 +61,9 @@ class CodebaseSymbolIndex:
                 elif file.endswith(".rs"):
                     self._index_rust_file(full_path, rel_path)
                     self.scanned_files.append(rel_path)
+                elif file.endswith(".swift"):
+                    self._index_swift_file(full_path, rel_path)
+                    self.scanned_files.append(rel_path)
                 elif file.endswith((".java", ".kt")):
                     self._index_jvm_file(full_path, rel_path)
                     self.scanned_files.append(rel_path)
@@ -174,6 +177,25 @@ class CodebaseSymbolIndex:
             name = m.group(1)
             line = content[:m.start()].count("\n") + 1
             self._add_symbol(name, "type", rel_path, line, f"type {name}")
+
+    def _index_swift_file(self, full_path: Path, rel_path: str):
+        try:
+            content = full_path.read_text(encoding="utf-8", errors="ignore")
+        except Exception:
+            return
+
+        # Matches class/struct/enum/protocol/extension Name
+        for m in re.finditer(r"(?:public\s+|private\s+|fileprivate\s+|internal\s+|open\s+)?(?:class|struct|enum|protocol|extension)\s+([A-Za-z0-9_]+)", content):
+            name = m.group(1)
+            line = content[:m.start()].count("\n") + 1
+            self._add_symbol(name, "type", rel_path, line, f"type {name}")
+
+        # Matches func func_name(...)
+        for m in re.finditer(r"(?:public\s+|private\s+|fileprivate\s+|internal\s+|open\s+|override\s+|mutating\s+)?func\s+([A-Za-z0-9_]+)\s*(?:<[^>]+>)?\s*\((.*?)\)", content):
+            name = m.group(1)
+            line = content[:m.start()].count("\n") + 1
+            sig = f"func {name}({m.group(2).strip()})"
+            self._add_symbol(name, "function", rel_path, line, sig)
 
     def _index_jvm_file(self, full_path: Path, rel_path: str):
         try:
