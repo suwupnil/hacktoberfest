@@ -40,7 +40,12 @@ class SecurityVerifier:
     def verify(self, issue: Issue) -> Issue:
         """Verifies a security report claim."""
         content = f"{issue.title}\n{issue.body}"
-        symbol = self.extract_target_symbol(content) or "parse_url_v2"
+        symbol = self.extract_target_symbol(content)
+        if not symbol:
+            candidates = re.findall(r"\b([A-Za-z0-9_]{3,})\b", content)
+            ignored = {"CVE", "RCE", "SECURITY", "REPORT", "VULNERABILITY", "VULNERABLE", "EXPLOIT", "ATTACK", "INJECTION", "REMOTE", "CODE", "EXECUTION", "SYSTEM", "ACCESS", "ADMIN", "CRITICAL", "HIGH", "THE", "THIS", "WITH", "WHEN", "FOR"}
+            filtered = [c for c in candidates if c.upper() not in ignored and not c.isdigit()]
+            symbol = filtered[0] if filtered else "unknown_target"
 
         # Lookup in AST index
         lookup = self.symbol_index.lookup(symbol)

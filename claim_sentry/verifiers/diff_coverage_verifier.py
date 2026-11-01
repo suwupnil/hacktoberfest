@@ -5,6 +5,7 @@ running the test suite under code coverage in the isolated sandbox, and calculat
 the exact intersection between modified lines and executed test lines.
 """
 
+import sys
 import re
 import json
 import tempfile
@@ -55,13 +56,13 @@ class DiffCoverageVerifier:
 
         # Run pytest inside sandbox with coverage tracking
         cov_cmd = [
-            "python3", "-m", "coverage", "run", "--source", ".",
+            sys.executable, "-m", "coverage", "run", "--source", ".",
             "-m", "pytest", "tests/"
         ]
         test_run = self.sandbox.run_command(cov_cmd)
 
         # Generate coverage json
-        cov_json_cmd = ["python3", "-m", "coverage", "json", "-o", "-"]
+        cov_json_cmd = [sys.executable, "-m", "coverage", "json", "-o", "-"]
         json_run = self.sandbox.run_command(cov_json_cmd)
 
         covered_lines_count = 0

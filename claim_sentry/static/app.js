@@ -18,24 +18,6 @@ function setupEventListeners() {
     if (e.key === "Enter") startTriage(repoInput.value);
   });
 
-  // Suggestion chips
-  document.getElementById("chip-grauity").addEventListener("click", () => {
-    repoInput.value = "https://github.com/Newton-School/grauity";
-    startTriage(repoInput.value);
-  });
-  document.getElementById("chip-flask").addEventListener("click", () => {
-    repoInput.value = "https://github.com/pallets/flask";
-    startTriage(repoInput.value);
-  });
-  document.getElementById("chip-httpx").addEventListener("click", () => {
-    repoInput.value = "https://github.com/encode/httpx";
-    startTriage(repoInput.value);
-  });
-  document.getElementById("chip-sample").addEventListener("click", () => {
-    repoInput.value = "https://github.com/devclub/url-toolkit";
-    startTriage(repoInput.value);
-  });
-
   // 3 Filter Tabs
   document.getElementById("btn-filter-all").addEventListener("click", () => setFilter("all"));
   document.getElementById("btn-filter-real").addEventListener("click", () => setFilter("real"));
@@ -162,6 +144,19 @@ function updateFilterCounts() {
 function renderIssues() {
   const container = document.getElementById("issues-list");
   container.innerHTML = "";
+
+  const hasTriaged = allIssues.some(i => i.evidence !== null);
+  if (!hasTriaged) {
+    container.innerHTML = `
+      <div class="empty-state-box">
+        <div class="empty-state-badge">⚡ AWAITING REPOSITORY INPUT</div>
+        <h2 class="empty-state-title">PASTE A GITHUB REPOSITORY TO BEGIN</h2>
+        <p class="empty-state-desc">Enter any public or private repository URL above and hit <strong>⚡ START TRIAGE</strong>. ClaimSentry will clone the repo into an air-gapped sandbox (0.00 MBPS), index AST symbol graphs across Python, Rust, Swift, and TypeScript, and test claims live.</p>
+        <div class="empty-state-hint">⚡ GitHub App webhook listener active at <code>/api/webhook/github</code></div>
+      </div>
+    `;
+    return;
+  }
 
   const filtered = allIssues.filter(item => {
     if (currentFilter === "real") return item.is_real_issue === true;

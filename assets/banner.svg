@@ -1,0 +1,140 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630" style="background:#FBF8F1; font-family:'JetBrains Mono', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+  <defs>
+    <filter id="hard-shadow" x="0" y="0" width="140%" height="140%" filterUnits="userSpaceOnUse">
+      <feOffset dx="6" dy="6" />
+      <feColorMatrix type="matrix" values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 1 0" />
+      <feBlend in="SourceGraphic" in2="hard-shadow" mode="normal" />
+    </filter>
+    <filter id="hard-shadow-sm" x="0" y="0" width="140%" height="140%" filterUnits="userSpaceOnUse">
+      <feOffset dx="4" dy="4" />
+      <feColorMatrix type="matrix" values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 1 0" />
+      <feBlend in="SourceGraphic" in2="hard-shadow-sm" mode="normal" />
+    </filter>
+  </defs>
+
+  <!-- BACKGROUND BASE -->
+  <rect width="1200" height="630" fill="#F8F6EE" />
+  <rect x="18" y="18" width="1164" height="594" fill="none" stroke="#000000" stroke-width="4" />
+
+  <!-- TOP DECORATIVE ACCENTS -->
+  <g transform="translate(48, 42)">
+    <text x="0" y="0" font-size="13" font-weight="900" letter-spacing="2" fill="#555" font-family="'JetBrains Mono', monospace">HACKTOBERFEST HACK DAY • SONIPAT</text>
+    <g transform="translate(0, 10)">
+      <rect x="0" y="0" width="28" height="8" fill="#C84B31" />
+      <rect x="32" y="0" width="28" height="8" fill="#5B8FF9" />
+      <rect x="64" y="0" width="28" height="8" fill="#F4A261" />
+    </g>
+  </g>
+
+  <!-- TOP RIGHT BARS -->
+  <g transform="translate(1080, 32)">
+    <rect x="0" y="0" width="14" height="42" fill="#E9C46A" />
+    <rect x="22" y="0" width="14" height="30" fill="#E76F51" />
+    <rect x="44" y="0" width="14" height="54" fill="#2A9D8F" />
+  </g>
+
+  <!-- PROBLEM NUMBER & TITLE -->
+  <g transform="translate(48, 115)">
+    <text x="0" y="0" font-size="14" font-weight="900" letter-spacing="2" fill="#D34528" font-family="'JetBrains Mono', monospace">PROBLEM 2</text>
+    <text x="0" y="48" font-size="52" font-weight="900" letter-spacing="-1.5" fill="#1B1E23">
+      Triage that tests the <tspan fill="#4F46E5">claims</tspan>
+    </text>
+    <text x="0" y="76" font-size="15" font-weight="700" fill="#4B5563">
+      You build: a GitHub App that checks whether a report is true, safely, and shows maintainers the evidence.
+    </text>
+  </g>
+
+  <!-- THREE-COLUMN INTERACTION ARCHITECTURE DIAGRAM -->
+  <!-- LEFT: 3 CLAIM REPORTS -->
+  <g transform="translate(48, 230)">
+    <!-- CARD 1: BUG REPORT -->
+    <g transform="translate(0, 0)">
+      <rect width="260" height="72" rx="0" fill="#FFFFFF" stroke="#000000" stroke-width="3" filter="url(#hard-shadow-sm)" />
+      <text x="16" y="24" font-size="10" font-weight="900" letter-spacing="1.5" fill="#C84B31" font-family="'JetBrains Mono', monospace">BUG REPORT</text>
+      <text x="16" y="50" font-size="14" font-weight="800" fill="#000000">"Crash on long URLs"</text>
+    </g>
+
+    <!-- CARD 2: SECURITY REPORT -->
+    <g transform="translate(0, 95)">
+      <rect width="260" height="72" rx="0" fill="#FFFFFF" stroke="#000000" stroke-width="3" filter="url(#hard-shadow-sm)" />
+      <text x="16" y="24" font-size="10" font-weight="900" letter-spacing="1.5" fill="#C84B31" font-family="'JetBrains Mono', monospace">SECURITY REPORT</text>
+      <text x="16" y="50" font-size="14" font-weight="800" fill="#000000">"RCE in parse_url_v2()"</text>
+    </g>
+
+    <!-- CARD 3: PULL REQUEST -->
+    <g transform="translate(0, 190)">
+      <rect width="260" height="72" rx="0" fill="#FFFFFF" stroke="#000000" stroke-width="3" filter="url(#hard-shadow-sm)" />
+      <text x="16" y="24" font-size="10" font-weight="900" letter-spacing="1.5" fill="#C84B31" font-family="'JetBrains Mono', monospace">PULL REQUEST</text>
+      <text x="16" y="50" font-size="14" font-weight="800" fill="#000000">"Fixes #120, adds tests"</text>
+    </g>
+  </g>
+
+  <!-- CONNECTING ARROWS (LEFT TO CENTER) -->
+  <path d="M 320 266 L 415 266 L 415 350 L 440 350" fill="none" stroke="#000000" stroke-width="3" stroke-linecap="square" />
+  <path d="M 320 361 L 440 361" fill="none" stroke="#000000" stroke-width="3" stroke-linecap="square" />
+  <path d="M 320 456 L 415 456 L 415 372 L 440 372" fill="none" stroke="#000000" stroke-width="3" stroke-linecap="square" />
+  <polygon points="440,361 430,354 430,368" fill="#000000" />
+
+  <!-- CENTER: YOUR GITHUB APP / CLAIM-SENTRY -->
+  <g transform="translate(450, 255)">
+    <rect width="320" height="212" rx="0" fill="#264653" stroke="#000000" stroke-width="4" filter="url(#hard-shadow)" />
+    <!-- HEADER BADGE -->
+    <text x="24" y="38" font-size="11" font-weight="900" letter-spacing="2" fill="#E9C46A" font-family="'JetBrains Mono', monospace">YOUR GITHUB APP</text>
+    <!-- MAIN ENGINE TITLE -->
+    <text x="24" y="86" font-size="34" font-weight="900" fill="#FFFFFF" letter-spacing="-1">Test the claim</text>
+    <line x1="24" y1="110" x2="296" y2="110" stroke="#3A6073" stroke-width="2" />
+    <!-- SUB FEATURES -->
+    <text x="24" y="142" font-size="13" font-weight="700" fill="#A7D7C5" font-family="'JetBrains Mono', monospace">🔒 Isolated air-gapped sandbox</text>
+    <text x="24" y="168" font-size="13" font-weight="700" fill="#A7D7C5" font-family="'JetBrains Mono', monospace">🚫 No secrets • Zero network</text>
+    <text x="24" y="194" font-size="13" font-weight="700" fill="#A7D7C5" font-family="'JetBrains Mono', monospace">⚡ Apple GPU / Local Open LLM</text>
+  </g>
+
+  <!-- CONNECTING ARROWS (CENTER TO RIGHT) -->
+  <path d="M 780 345 L 825 345 L 825 266 L 860 266" fill="none" stroke="#000000" stroke-width="3" stroke-linecap="square" />
+  <path d="M 780 361 L 860 361" fill="none" stroke="#000000" stroke-width="3" stroke-linecap="square" />
+  <path d="M 780 377 L 825 377 L 825 456 L 860 456" fill="none" stroke="#000000" stroke-width="3" stroke-linecap="square" />
+  <polygon points="860,266 850,259 850,273" fill="#000000" />
+  <polygon points="860,361 850,354 850,368" fill="#000000" />
+  <polygon points="860,456 850,449 850,463" fill="#000000" />
+
+  <!-- RIGHT: 3 EVIDENCE DOSSIERS -->
+  <g transform="translate(870, 230)">
+    <!-- EVIDENCE 1: REPRODUCED -->
+    <g transform="translate(0, 0)">
+      <rect width="280" height="72" rx="0" fill="#D8E2DC" stroke="#000000" stroke-width="3" filter="url(#hard-shadow-sm)" />
+      <text x="16" y="24" font-size="10" font-weight="900" letter-spacing="1.5" fill="#1B4965" font-family="'JetBrains Mono', monospace">EVIDENCE</text>
+      <text x="16" y="50" font-size="14" font-weight="900" fill="#006400">✓ Reproduced on 2.4.1</text>
+    </g>
+
+    <!-- EVIDENCE 2: REJECTED SLOP -->
+    <g transform="translate(0, 95)">
+      <rect width="280" height="72" rx="0" fill="#FFDDD2" stroke="#000000" stroke-width="3" filter="url(#hard-shadow-sm)" />
+      <text x="16" y="24" font-size="10" font-weight="900" letter-spacing="1.5" fill="#9D0208" font-family="'JetBrains Mono', monospace">EVIDENCE</text>
+      <text x="16" y="50" font-size="14" font-weight="900" fill="#9D0208">✗ parse_url_v2() does not exist</text>
+    </g>
+
+    <!-- EVIDENCE 3: UNTESTED PR -->
+    <g transform="translate(0, 190)">
+      <rect width="280" height="72" rx="0" fill="#FEF9E7" stroke="#000000" stroke-width="3" filter="url(#hard-shadow-sm)" />
+      <text x="16" y="24" font-size="10" font-weight="900" letter-spacing="1.5" fill="#B7791F" font-family="'JetBrains Mono', monospace">EVIDENCE</text>
+      <text x="16" y="50" font-size="14" font-weight="900" fill="#744210">! No test covers the change</text>
+    </g>
+  </g>
+
+  <!-- BOTTOM FOOTER -->
+  <!-- BOTTOM LEFT: NEWTON SCHOOL & RISHIHOOD -->
+  <g transform="translate(48, 560)">
+    <g transform="translate(0, 0)">
+      <rect x="0" y="8" width="8" height="24" fill="#5B8FF9" />
+      <rect x="12" y="0" width="8" height="32" fill="#5B8FF9" opacity="0.6" />
+      <rect x="24" y="16" width="8" height="16" fill="#F4A261" />
+      <rect x="36" y="8" width="8" height="24" fill="#E76F51" />
+    </g>
+    <text x="56" y="22" font-size="13" font-weight="900" letter-spacing="2" fill="#2D3748" font-family="'JetBrains Mono', monospace">NEWTON SCHOOL OF TECHNOLOGY × RISHIHOOD UNIVERSITY</text>
+  </g>
+
+  <!-- BOTTOM RIGHT: TEAM ZIG2 -->
+  <g transform="translate(760, 560)">
+    <text x="0" y="22" font-size="13" font-weight="900" letter-spacing="1.5" fill="#1B1E23" font-family="'JetBrains Mono', monospace">TEAM ZIG2: <tspan fill="#C84B31">SWAPNIL PRADHAN</tspan> &amp; <tspan fill="#4F46E5">AKSHAT KUMAR</tspan></text>
+  </g>
+</svg>

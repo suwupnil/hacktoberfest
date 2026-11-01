@@ -1,13 +1,14 @@
 """Local Open-Source LLM & Vision Provider for ClaimSentry.
 
 Runs entirely local models via Ollama on Apple Silicon M5 Metal GPU.
-Includes deterministic AST fallback synthesis for ultra-fast, zero-cloud verification.
+Includes dynamic AST-guided fallback synthesis for ultra-fast, zero-cloud verification.
 """
 
 import json
 import re
 import urllib.request
 import urllib.error
+from pathlib import Path
 from typing import Dict, Any, Optional, List
 
 
@@ -58,23 +59,24 @@ class LocalLLMEngine:
     def synthesize_repro_script(self, issue_title: str, issue_body: str, repo_files: List[str]) -> str:
         """
         Synthesizes a minimal Python reproduction script for the bug report.
-        1. Checks if the issue body already contains a fenced reproduction code snippet.
-        2. Queries local Qwen 2.5 Coder 7B on Metal GPU to generate the script.
-        3. Falls back to AST semantic pattern synthesizer.
+        Uses 3-tier fallback strategy:
+        1. Reporter Code Snippet Extraction
+        2. Local Qwen 2.5 Coder 7B Execution
+        3. Dynamic AST-guided synthesis from discovered repository modules
         """
-        # Strategy 1: Real GitHub Issue Markdown Codeblock Extraction
-        body_snippets = re.findall(r"```(?:python|py)?\s*(.*?)\s*```", issue_body, re.DOTALL)
-        for snippet in body_snippets:
+        content = f"{issue_title}\n{issue_body}"
+
+        # Strategy 1: Check if reporter provided a runnable code snippet
+        code_blocks = re.findall(r"```(?:python)?\s*(.*?)\s*```", content, re.DOTALL)
+        for snippet in code_blocks:
             snippet_str = snippet.strip()
-            # If it contains executable python lines (import, calls, assignments)
             if any(k in snippet_str for k in ["import ", "from ", "()", "="]) and len(snippet_str) > 20:
-                # Discard snippets that are purely traceback text
                 if "Traceback (most recent call last)" not in snippet_str:
                     return f"# Extracted directly from reporter's issue description:\n{snippet_str}"
 
-        # Strategy 2: Local Qwen 2.5 Coder 7B via Ollama
+        # Strategy 2: Local Qwen 2.5 Coder via Ollama
         if self.is_available():
-            module_context = ", ".join(repo_files[:8]) if repo_files else "url_toolkit.parser"
+            module_context = ", ".join(repo_files[:8]) if repo_files else "main"
             prompt = f"""You are an autonomous bug triage engineer. Write a MINIMAL reproduction script that triggers the bug reported here:
 Issue Title: {issue_title}
 Issue Description: {issue_body}
@@ -90,55 +92,106 @@ STRICT RULES:
                 match = re.search(r"```python\s*(.*?)\s*```", response, re.DOTALL)
                 if match:
                     code = match.group(1).strip()
-                    if "def parse_url" not in code and "except" not in code:
+                    if "except" not in code:
                         return code
 
-        # Strategy 3: Deterministic AST-guided synthesis fallback:
-        return self._synthesize_deterministic_repro(issue_title, issue_body)
+        # Strategy 3: Dynamic AST-guided synthesis from actual discovered repository modules
+        return self._synthesize_deterministic_repro(issue_title, issue_body, repo_files)
 
-    def _synthesize_deterministic_repro(self, title: str, body: str) -> str:
-        """Generates deterministic reproduction script based on semantic bug signatures."""
-        content = f"{title}\n{body}".lower()
+    def _synthesize_deterministic_repro(self, title: str, body: str, repo_files: Optional[List[str]] = None) -> str:
+        """Dynamically generates reproduction script using actual discovered repository files and tokens."""
+        content = f"{title}\n{body}"
 
-        # Case 1: Long URL crash
-        if "long url" in content or "length" in content or "2048" in content or "buffer" in content:
-            return """# Minimal reproduction script: Crash on Long URLs
-from url_toolkit.parser import parse_url
+        # Determine candidate module from discovered repo files
+        mod_candidates = []
+        if repo_files:
+            for f in repo_files:
+                p = Path(f)
+                if p.suffix in (".py", ""):
+                    parts = [part for part in p.with_suffix("").parts if part not in ["__init__", "conftest", "setup", "test", "tests"]]
+                    if parts:
+                        dot_path = ".".join(parts)
+                        if dot_path not in mod_candidates:
+                            mod_candidates.append(dot_path)
+                        if p.stem not in ["__init__", "conftest", "setup", "test", "tests"] and p.stem not in mod_candidates:
+                            mod_candidates.append(p.stem)
 
-# Construct a URL exceeding 2048 characters to trigger ValueError
-long_payload = "https://example.com/api/v1/search?query=" + ("A" * 2500)
-print(f"[REPRO] Calling parse_url with payload length {len(long_payload)}...")
-result = parse_url(long_payload)
-print("[REPRO] Unexpected success:", result)
-"""
+        target_mod = mod_candidates[0] if mod_candidates else "app"
 
-        # Case 2: Unicode / encoding crash
-        if "unicode" in content or "utf-8" in content or "decode" in content:
-            return """# Minimal reproduction script: Unicode encoding crash
-from url_toolkit.parser import parse_url
+        # Extract function call or symbol mentioned in issue
+        func_match = re.search(r"\b([A-Za-z0-9_]{3,})\s*\(", content)
+        all_tokens = re.findall(r"\b([A-Za-z0-9_]{3,})\b", content)
+        underscore_tokens = [t for t in all_tokens if "_" in t and not t.startswith("__")]
 
-bad_unicode_url = "https://example.com/search?q=\\ud800\\udc00invalid"
-print("[REPRO] Testing invalid unicode parsing...")
-result = parse_url(bad_unicode_url)
-print("[REPRO] Result:", result)
-"""
+        if func_match:
+            target_func = func_match.group(1)
+        elif underscore_tokens:
+            target_func = underscore_tokens[0]
+        else:
+            ignored = {"BUG", "ISSUE", "CRASH", "ERROR", "FAIL", "NONE", "NULL", "TEST", "WITH", "WHEN", "FOR", "SOME", "LONG", "SHORT", "CALL", "CALLING"}
+            meaningful = [t for t in all_tokens if t.upper() not in ignored and not t.isdigit()]
+            target_func = meaningful[0] if meaningful else "parse_url"
 
-        # Case 3: NoneType handling
-        if "none" in content or "null" in content or "typeerror" in content:
-            return """# Minimal reproduction script: NoneType handling
-from url_toolkit.parser import parse_url
+        # Check payload hints
+        payload = "'test_payload'"
+        if "long" in content.lower() or "length" in content.lower() or "2048" in content.lower():
+            payload = "'https://example.com/' + ('A' * 2500)"
+        elif "none" in content.lower() or "null" in content.lower():
+            payload = "None"
+        elif "unicode" in content.lower() or "utf-8" in content.lower():
+            payload = "'\\ud800\\udc00invalid'"
 
-print("[REPRO] Testing parse_url(None)...")
-result = parse_url(None)
-print("[REPRO] Result:", result)
-"""
+        cand_list_str = str(mod_candidates[:6] or [target_mod])
+        target_func_name = target_func
 
-        # Default fallback
-        return """# Minimal reproduction script
-from url_toolkit.parser import parse_url
+        return f"""# Minimal reproduction script synthesized from repository structure
+import sys
+import importlib
+from pathlib import Path
 
-test_url = "https://example.com"
-print("[REPRO] Calling parse_url with valid test input...")
-result = parse_url(test_url)
-print("[REPRO] Completed cleanly:", result)
+# Add repository root and top-level packages to sys.path
+repo_root = Path.cwd().resolve()
+if str(repo_root) not in sys.path:
+    sys.path.insert(0, str(repo_root))
+for init_f in repo_root.rglob("__init__.py"):
+    pkg_dir = str(init_f.parent)
+    if pkg_dir not in sys.path:
+        sys.path.insert(0, pkg_dir)
+
+# Resolve target function across discovered modules
+target_func_name = '{target_func}'
+func = None
+candidates = {cand_list_str}
+
+for cand in candidates:
+    try:
+        mod = importlib.import_module(cand)
+        if hasattr(mod, target_func_name):
+            func = getattr(mod, target_func_name)
+            break
+        # Also check submodules
+        for attr in dir(mod):
+            sub = getattr(mod, attr, None)
+            if hasattr(sub, target_func_name):
+                func = getattr(sub, target_func_name)
+                break
+        if func:
+            break
+    except Exception:
+        continue
+
+if func and callable(func):
+    print("[REPRO] Calling {target_func}(" + str({payload}) + ")...")
+    res = func({payload})
+    print("[REPRO] Returned cleanly:", res)
+else:
+    print("[REPRO] Direct call fallback for {target_func} in {target_mod}...")
+    try:
+        mod = importlib.import_module('{target_mod}')
+        func = getattr(mod, target_func_name)
+        res = func({payload})
+        print("[REPRO] Result:", res)
+    except AttributeError:
+        # If symbol does not exist, let AttributeError raise cleanly
+        raise
 """
