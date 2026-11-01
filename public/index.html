@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f4f0">
+  <meta name="description" content="ClaimSentry tests GitHub bug reports, security claims, pull requests, and visual evidence in an air-gapped sandbox. No guesswork. Just proof.">
+  <title>ClaimSentry — Triage that tests the claims.</title>
+  <style>
+    :root {
+      --paper: #f4f4f0;
+      --white: #fff;
+      --ink: #111110;
+      --muted: #555550;
+      --line: #111110;
+      --green: #00f560;
+      --yellow: #ffd60a;
+      --red: #ff3b30;
+      --cyan: #00e5ff;
+      --mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      --display: Impact, "Arial Black", "Helvetica Neue", sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--mono); }
+    a { color: inherit; }
+    button, a { -webkit-tap-highlight-color: transparent; }
+    :focus-visible { outline: 3px solid var(--red); outline-offset: 4px; }
+    ::selection { background: var(--green); color: var(--ink); }
+    .skip-link { position: absolute; left: 16px; top: -100px; z-index: 20; background: var(--yellow); padding: 10px; }
+    .skip-link:focus { top: 10px; }
+    .container { width: min(100% - 48px, 1344px); margin-inline: auto; }
+    .topline { border-bottom: 2px solid var(--line); background: var(--ink); color: var(--white); font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+    .topline .container { display: flex; justify-content: space-between; gap: 16px; padding-block: 9px; }
+    .topline strong { color: var(--green); }
+    .nav { border-bottom: 3px solid var(--line); background: var(--paper); }
+    .nav-inner { display: flex; align-items: center; justify-content: space-between; min-height: 78px; gap: 20px; }
+    .brand { display: inline-flex; gap: 11px; align-items: center; text-decoration: none; font-family: var(--display); font-size: 27px; letter-spacing: .015em; white-space: nowrap; }
+    .brand-icon { display: grid; place-items: center; width: 36px; height: 36px; background: var(--green); border: 2px solid var(--line); font-family: var(--mono); font-size: 22px; font-weight: 900; box-shadow: 3px 3px 0 var(--ink); }
+    .nav-links { display: flex; align-items: center; gap: clamp(18px, 3vw, 42px); }
+    .nav-links a { text-decoration: none; text-transform: uppercase; font-size: 11px; font-weight: 900; letter-spacing: .03em; }
+    .nav-links a:not(.nav-cta):hover { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 5px; }
+    .nav-links .nav-cta { border: 2px solid var(--line); padding: 11px 15px; background: var(--yellow); box-shadow: 4px 4px 0 var(--ink); transition: transform .15s, box-shadow .15s; }
+    .nav-links .nav-cta:hover { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--ink); }
+    .hero { padding: clamp(64px, 9vw, 132px) 0 100px; overflow: hidden; }
+    .hero-grid { display: grid; grid-template-columns: minmax(0, 1.13fr) minmax(0, .87fr); align-items: center; gap: clamp(30px, 5vw, 84px); }
+    .eyebrow { display: inline-flex; align-items: center; gap: 9px; margin: 0 0 28px; font-size: 11px; font-weight: 900; letter-spacing: .06em; text-transform: uppercase; }
+    .eyebrow::before { content: ""; display: inline-block; width: 9px; height: 9px; background: var(--red); border: 1px solid var(--line); }
+    h1, h2, h3, p { margin-top: 0; }
+    h1, h2, h3 { font-family: var(--display); font-weight: 900; text-transform: uppercase; }
+    h1 { margin-bottom: 30px; font-size: clamp(68px, 8.6vw, 145px); line-height: .89; letter-spacing: -.035em; }
+    .highlight { display: inline-block; position: relative; z-index: 0; white-space: nowrap; }
+    .highlight::before { content: ""; position: absolute; left: -1%; right: -2%; top: 8%; bottom: -2%; z-index: -1; background: var(--green); transform: rotate(-1.4deg); }
+    .hero-copy { max-width: 540px; margin-bottom: 29px; font-size: clamp(15px, 1.3vw, 18px); line-height: 1.65; font-weight: 600; }
+    .hero-copy strong { background: var(--yellow); }
+    .actions { display: flex; flex-wrap: wrap; gap: 13px; align-items: center; }
+    .button { display: inline-flex; align-items: center; justify-content: center; gap: 13px; min-height: 54px; padding: 14px 20px; border: 2px solid var(--line); box-shadow: 5px 5px 0 var(--ink); font-size: 12px; font-weight: 900; text-decoration: none; text-transform: uppercase; transition: transform .15s, box-shadow .15s; }
+    .button:hover { transform: translate(3px, 3px); box-shadow: 2px 2px 0 var(--ink); }
+    .button:active { transform: translate(5px, 5px); box-shadow: none; }
+    .button-primary { background: var(--green); }
+    .button-secondary { background: var(--white); }
+    .hero-note { margin: 26px 0 0; color: var(--muted); font-size: 11px; font-weight: 700; text-transform: uppercase; }
+    .hero-art { position: relative; padding: 30px 23px 38px 0; }
+    .hero-art::before { content: ""; position: absolute; inset: 0 0 18px 24px; border: 3px solid var(--line); background: var(--cyan); transform: rotate(4deg); }
+    .stamp { position: absolute; right: -13px; top: -19px; z-index: 2; display: grid; place-items: center; width: 105px; height: 105px; border: 3px solid var(--line); border-radius: 50%; background: var(--yellow); box-shadow: 4px 4px 0 var(--ink); transform: rotate(14deg); text-align: center; font-size: 11px; font-weight: 900; line-height: 1.25; }
+    .report { position: relative; border: 3px solid var(--line); background: var(--white); box-shadow: 9px 9px 0 var(--ink); transform: rotate(-2deg); }
+    .report-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 13px 17px; border-bottom: 3px solid var(--line); background: var(--ink); color: var(--white); font-size: 11px; font-weight: 900; }
+    .report-head span:last-child { color: var(--green); }
+    .report-body { padding: clamp(19px, 3vw, 32px); }
+    .report-id { margin-bottom: 18px; color: var(--muted); font-size: 11px; font-weight: 800; }
+    .report-title { margin-bottom: 15px; font-family: var(--display); font-size: clamp(32px, 3.5vw, 57px); line-height: .98; letter-spacing: -.02em; }
+    .report-text { margin-bottom: 21px; line-height: 1.6; font-size: 12px; font-weight: 600; }
+    .code-box { border: 2px solid var(--line); background: #171a17; color: #eee; padding: 16px; font-size: 11px; line-height: 1.9; overflow-x: auto; }
+    .code-box .prompt { color: var(--green); }
+    .code-box .dim { color: #9eaaa0; }
+    .report-result { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 17px; padding-top: 17px; border-top: 2px dashed var(--line); font-size: 11px; font-weight: 900; }
+    .verdict { padding: 8px 10px; border: 2px solid var(--line); background: var(--green); white-space: nowrap; }
+    .ticker { overflow: hidden; border-block: 3px solid var(--line); background: var(--yellow); }
+    .ticker-inner { display: flex; width: max-content; gap: 0; padding: 15px 0; font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: .03em; }
+    .ticker-inner span { padding: 0 25px; border-right: 2px solid var(--line); }
+    section[id] { scroll-margin-top: 20px; }
+    .section { padding: 100px 0; }
+    .section-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 25px; margin-bottom: 40px; }
+    .section-index { display: block; margin-bottom: 14px; font-size: 11px; font-weight: 900; letter-spacing: .08em; }
+    .section-title { max-width: 810px; margin: 0; font-size: clamp(48px, 6.8vw, 104px); line-height: .93; letter-spacing: -.025em; }
+    .section-aside { max-width: 235px; margin-top: auto; margin-bottom: 4px; font-size: 12px; line-height: 1.6; font-weight: 700; }
+    .steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border: 3px solid var(--line); background: var(--white); box-shadow: 8px 8px 0 var(--ink); }
+    .step { min-height: 282px; padding: clamp(24px, 3vw, 42px); }
+    .step + .step { border-left: 3px solid var(--line); }
+    .step-num { display: inline-grid; place-items: center; width: 50px; height: 50px; margin-bottom: 40px; border: 2px solid var(--line); background: var(--yellow); font-family: var(--display); font-size: 25px; }
+    .step:nth-child(2) .step-num { background: var(--cyan); }
+    .step:nth-child(3) .step-num { background: var(--green); }
+    .step h3 { font-size: 31px; line-height: 1; margin-bottom: 13px; }
+    .step p { max-width: 310px; margin-bottom: 0; font-size: 12px; line-height: 1.7; font-weight: 600; }
+    .features { border-block: 3px solid var(--line); background: var(--ink); color: var(--white); }
+    .features .section-aside { color: #c4c4bf; }
+    .feature-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+    .feature { position: relative; display: flex; flex-direction: column; min-height: 260px; padding: clamp(25px, 3vw, 38px); border: 2px solid var(--white); background: #1f211f; }
+    .feature:nth-child(1) { border-top: 8px solid var(--green); }
+    .feature:nth-child(2) { border-top: 8px solid var(--red); }
+    .feature:nth-child(3) { border-top: 8px solid var(--yellow); }
+    .feature:nth-child(4) { border-top: 8px solid var(--cyan); }
+    .feature-label { color: #aaa; font-size: 11px; font-weight: 900; text-transform: uppercase; }
+    .feature h3 { margin: auto 0 12px; font-size: clamp(31px, 3.3vw, 48px); line-height: 1; }
+    .feature p { max-width: 470px; margin-bottom: 0; color: #d2d2cd; font-size: 12px; line-height: 1.6; }
+    .feature-symbol { position: absolute; right: 28px; top: 22px; font-family: var(--display); font-size: 54px; line-height: 1; color: var(--green); }
+    .feature:nth-child(2) .feature-symbol { color: var(--red); }
+    .feature:nth-child(3) .feature-symbol { color: var(--yellow); }
+    .feature:nth-child(4) .feature-symbol { color: var(--cyan); }
+    .principle { display: grid; grid-template-columns: 1fr 1fr; border: 3px solid var(--line); box-shadow: 8px 8px 0 var(--ink); }
+    .principle-main { display: flex; flex-direction: column; justify-content: space-between; min-height: 390px; padding: clamp(26px, 4vw, 55px); background: var(--green); border-right: 3px solid var(--line); }
+    .principle-main h2 { margin-bottom: 30px; font-size: clamp(47px, 6vw, 88px); line-height: .92; }
+    .principle-main p { max-width: 415px; margin-bottom: 0; font-size: 13px; font-weight: 700; line-height: 1.65; }
+    .principle-list { background: var(--white); }
+    .principle-row { display: flex; align-items: center; gap: 20px; min-height: 25%; padding: 20px clamp(22px, 3vw, 40px); border-bottom: 2px solid var(--line); font-size: 13px; font-weight: 900; }
+    .principle-row:last-child { border-bottom: 0; }
+    .principle-row span { font-family: var(--display); font-size: 30px; }
+    .start { border-top: 3px solid var(--line); background: var(--yellow); }
+    .start-grid { display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: clamp(30px, 6vw, 100px); }
+    .start h2 { font-size: clamp(55px, 7vw, 108px); line-height: .9; margin-bottom: 23px; }
+    .start p { max-width: 490px; font-size: 13px; line-height: 1.65; font-weight: 700; }
+    .start .button { background: var(--white); }
+    .install { border: 3px solid var(--line); background: var(--ink); color: var(--white); box-shadow: 8px 8px 0 var(--ink); }
+    .install-top { display: flex; justify-content: space-between; padding: 13px 17px; border-bottom: 2px solid #555; color: var(--green); font-size: 11px; font-weight: 900; }
+    .install pre { margin: 0; padding: clamp(21px, 3vw, 35px); overflow-x: auto; font-family: var(--mono); font-size: clamp(11px, 1vw, 13px); line-height: 2.1; }
+    .install .comment { color: #999; }
+    .install .command { color: var(--green); }
+    .install-foot { border-top: 2px solid #555; padding: 12px 17px; color: #bbb; font-size: 11px; }
+    .footer { padding: 28px 0; border-top: 3px solid var(--line); background: var(--paper); }
+    .footer-inner { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 22px; }
+    .footer .brand { font-size: 21px; }
+    .footer .brand-icon { width: 30px; height: 30px; font-size: 18px; }
+    .footer-meta { color: var(--muted); font-size: 10px; font-weight: 800; line-height: 1.6; text-transform: uppercase; }
+    .footer-links { display: flex; gap: 20px; font-size: 11px; font-weight: 900; text-transform: uppercase; }
+    .footer-links a:hover { text-decoration-thickness: 2px; }
+    @media (max-width: 900px) {
+      .hero-grid { grid-template-columns: 1fr; }
+      .hero { padding-bottom: 70px; }
+      .hero-art { width: min(100% - 15px, 610px); margin: 20px auto 0; }
+      .section-aside { display: none; }
+      .steps { grid-template-columns: 1fr; }
+      .step { min-height: 0; }
+      .step + .step { border-left: 0; border-top: 3px solid var(--line); }
+      .step-num { margin-bottom: 25px; }
+      .start-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 600px) {
+      .container { width: min(100% - 32px, 1344px); }
+      .topline { font-size: 9px; }
+      .topline .container span:last-child { display: none; }
+      .nav-inner { min-height: 68px; }
+      .brand { font-size: 23px; }
+      .nav-links { gap: 0; }
+      .nav-links a:not(.nav-cta) { display: none; }
+      .nav-links .nav-cta { padding: 9px 10px; font-size: 10px; }
+      h1 { font-size: clamp(59px, 15.4vw, 90px); }
+      .hero { padding-top: 65px; }
+      .hero-art { padding-top: 28px; }
+      .stamp { width: 76px; height: 76px; right: -7px; top: -4px; font-size: 9px; }
+      .report-head, .report-id, .report-result { font-size: 9px; }
+      .report-body { padding: 20px; }
+      .section { padding: 70px 0; }
+      .feature-grid { grid-template-columns: 1fr; }
+      .feature { min-height: 230px; }
+      .principle { grid-template-columns: 1fr; }
+      .principle-main { min-height: 300px; border-right: 0; border-bottom: 3px solid var(--line); }
+      .principle-row { min-height: 70px; }
+      .footer-inner { align-items: flex-start; flex-direction: column; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="topline"><div class="container"><span>INDEPENDENT CLAIM VERIFICATION / BUILT FOR MAINTAINERS</span><span>LOCAL FIRST <strong>●</strong> EVIDENCE ALWAYS</span></div></div>
+  <header class="nav">
+    <div class="container nav-inner">
+      <a class="brand" href="#top" aria-label="ClaimSentry
+ home"><span class="brand-icon" aria-hidden="true">✳</span> CLAIMSENTRY<span aria-hidden="true">.</span></a>
+      <nav class="nav-links" aria-label="Main navigation">
+        <a href="#how-it-works">How it works</a>
+        <a href="#capabilities">Capabilities</a>
+        <a href="#principles">Principles</a>
+        <a class="nav-cta" href="https://github.com/suwupnil/hacktoberfest">View on GitHub ↗</a>
+      </nav>
+    </div>
+  </header>
+  <main id="main">
+    <section class="hero" id="top" aria-labelledby="hero-title">
+      <div class="container hero-grid">
+        <div>
+          <p class="eyebrow">The anti-guesswork triage engine</p>
+          <h1 id="hero-title">DON’T<br>GUESS.<br><span class="highlight">PROVE IT.</span></h1>
+          <p class="hero-copy">Issue says it’s broken? PR says it’s fixed? <strong>ClaimSentry tests the claim.</strong> Real code, isolated execution, and evidence you can actually inspect.</p>
+          <div class="actions">
+            <a class="button button-primary" href="#get-started">Get started <span aria-hidden="true">↗</span></a>
+            <a class="button button-secondary" href="#how-it-works">See how it works <span aria-hidden="true">↓</span></a>
+          </div>
+          <p class="hero-note">Open source / Local AI / No cloud API key required</p>
+        </div>
+        <div class="hero-art" aria-label="Illustration of a ClaimSentry evidence report">
+          <div class="stamp" aria-hidden="true">CLAIMS<br>≠<br>PROOF</div>
+          <div class="report">
+            <div class="report-head"><span>▣ EVIDENCE DOSSIER</span><span>● LOCAL RUN</span></div>
+            <div class="report-body">
+              <p class="report-id">CASE FILE / ILLUSTRATIVE EXAMPLE</p>
+              <h2 class="report-title">“LONG URLS<br>CRASH THE APP.”</h2>
+              <p class="report-text">Don’t take the report at face value. Reproduce it in isolation and keep the trace.</p>
+              <div class="code-box" aria-hidden="true"><span class="dim">$ claim-sentry / sandbox</span><br><span class="prompt">→</span> running minimal reproduction<br><span class="prompt">→</span> network blocked · secrets scrubbed<br><span class="prompt">→</span> captured exit code + traceback</div>
+              <div class="report-result"><span>THE CLAIM HAS BEEN TESTED</span><span class="verdict">✓ EVIDENCE ATTACHED</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <div class="ticker" aria-label="Reproduce bugs, audit symbols, check coverage, inspect media">
+      <div class="ticker-inner"><span>✳ REPRODUCE BUGS</span><span>✳ AUDIT SYMBOLS</span><span>✳ CHECK DIFF COVERAGE</span><span>✳ INSPECT MEDIA</span><span>✳ ATTACH PROOF</span><span>✳ REPRODUCE BUGS</span><span>✳ AUDIT SYMBOLS</span></div>
+    </div>
+    <section class="section" id="how-it-works" aria-labelledby="how-title">
+      <div class="container">
+        <div class="section-top"><div><span class="section-index">01 / THE METHOD</span><h2 class="section-title" id="how-title">FROM REPORT<br>TO RECEIPT.</h2></div><p class="section-aside">Less “looks legit to me.” More “here’s exactly what happened.”</p></div>
+        <div class="steps">
+          <article class="step"><span class="step-num">01</span><h3>TAKE THE CLAIM.</h3><p>Start with a GitHub repository. ClaimSentry collects open issues and pull requests for triage.</p></article>
+          <article class="step"><span class="step-num">02</span><h3>RUN THE TEST.</h3><p>Scan real symbols, execute minimal reproductions in a restricted sandbox, and check changed-line coverage.</p></article>
+          <article class="step"><span class="step-num">03</span><h3>SHOW THE PROOF.</h3><p>Get a verdict backed by concrete artifacts: traces, exit codes, file locations, and coverage data.</p></article>
+        </div>
+      </div>
+    </section>
+    <section class="section features" id="capabilities" aria-labelledby="capabilities-title">
+      <div class="container">
+        <div class="section-top"><div><span class="section-index">02 / THE TOOLKIT</span><h2 class="section-title" id="capabilities-title">FOUR WAYS TO<br>FIND THE TRUTH.</h2></div><p class="section-aside">Different claims need different tests. One place to inspect the evidence.</p></div>
+        <div class="feature-grid">
+          <article class="feature"><span class="feature-label">Verifier A / Bug reports</span><span class="feature-symbol" aria-hidden="true">↳</span><h3>REPRODUCE IT.</h3><p>Run a minimal reproduction in the sandbox. Keep the exception, stdout, and exit code instead of a hunch.</p></article>
+          <article class="feature"><span class="feature-label">Verifier B / Security claims</span><span class="feature-symbol" aria-hidden="true">⌕</span><h3>FIND THE SYMBOL.</h3><p>Audit the codebase to check whether a claimed vulnerable function or component actually exists.</p></article>
+          <article class="feature"><span class="feature-label">Verifier C / Pull requests</span><span class="feature-symbol" aria-hidden="true">%</span><h3>CHECK THE DIFF.</h3><p>Compare modified lines with test coverage to see what a pull request really exercises.</p></article>
+          <article class="feature"><span class="feature-label">Verifier D / Screenshots &amp; video</span><span class="feature-symbol" aria-hidden="true">▣</span><h3>READ THE SIGNAL.</h3><p>Extract text from screenshots and video keyframes, then compare the clues with repository code.</p></article>
+        </div>
+      </div>
+    </section>
+    <section class="section" id="principles" aria-labelledby="principles-title">
+      <div class="container">
+        <span class="section-index">03 / THE NON-NEGOTIABLES</span>
+        <div class="principle">
+          <div class="principle-main"><h2 id="principles-title">BUILT FOR<br>DOUBT.<br>DESIGNED<br>FOR PROOF.</h2><p>Deterministic checks first. Local AI when useful. Evidence before confidence.</p></div>
+          <div class="principle-list">
+            <div class="principle-row"><span aria-hidden="true">01</span> Untrusted reproductions run with network access blocked.</div>
+            <div class="principle-row"><span aria-hidden="true">02</span> Environment secrets are scrubbed before execution.</div>
+            <div class="principle-row"><span aria-hidden="true">03</span> Local models assist; they don’t replace verification.</div>
+            <div class="principle-row"><span aria-hidden="true">04</span> Every conclusion comes with inspectable evidence.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="section start" id="get-started" aria-labelledby="start-title">
+      <div class="container start-grid">
+        <div><span class="section-index">04 / YOUR TURN</span><h2 id="start-title">MAKE YOUR<br>CLAIMS<br>ANSWERABLE.</h2><p>Clone the project, install the Python dependencies, and launch the local dashboard. For optional local AI setup, follow the README.</p><a class="button" href="https://github.com/suwupnil/hacktoberfest#-quickstart-run-it-on-your-machine-in-2-minutes">Read the full quickstart ↗</a></div>
+        <div class="install" aria-label="Quickstart terminal commands">
+          <div class="install-top"><span>TERMINAL / QUICKSTART</span><span>● LOCAL</span></div>
+          <pre><span class="comment"># Get the code</span>
+<span class="command">$</span> git clone https://github.com/suwupnil/hacktoberfest.git
+<span class="command">$</span> cd hacktoberfest
+
+<span class="comment"># Prepare your environment</span>
+<span class="command">$</span> python3 -m venv .venv
+<span class="command">$</span> .venv/bin/pip install -r requirements.txt
+
+<span class="comment"># Launch the local dashboard</span>
+<span class="command">$</span> .venv/bin/python run.py</pre>
+          <div class="install-foot">OPEN → http://127.0.0.1:8000</div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <footer class="footer"><div class="container footer-inner"><a class="brand" href="#top"><span class="brand-icon" aria-hidden="true">✳</span> CLAIMSENTRY.</a><span class="footer-meta">Triage that tests the claims.<br>Built by Team Zig2 for Hacktoberfest HackDay Sonipat.</span><div class="footer-links"><a href="https://github.com/suwupnil/hacktoberfest">GitHub ↗</a><a href="https://github.com/suwupnil/hacktoberfest/blob/main/LICENSE">License ↗</a></div></div></footer>
+</body>
+</html>
