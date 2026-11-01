@@ -23,7 +23,14 @@ from .engine import ClaimSentryEngine
 from .llm_engine import LocalLLMEngine
 from .sandbox import get_sanitized_env, count_exposed_secrets, ExecutionSandbox
 from .ast_scanner import CodebaseSymbolIndex
-from .github_fetcher import parse_github_url, clone_github_repo, fetch_github_issues, get_github_token
+from .github_fetcher import (
+    parse_github_url,
+    clone_github_repo,
+    fetch_github_issues,
+    get_github_token,
+    post_github_comment,
+    format_evidence_comment,
+)
 
 
 app = FastAPI(title="ClaimSentry Triage Engine", version="1.0.0")
@@ -269,8 +276,22 @@ async def github_app_webhook(request: Request, background_tasks: BackgroundTasks
 
         engine.issues.insert(0, webhook_issue)
 
+        repo_data = payload.get("repository", {})
+        repo_owner = repo_data.get("owner", {}).get("login", "")
+        repo_name = repo_data.get("name", "")
+
         def run_single():
             engine.triage_single_issue(webhook_issue, broadcast_event)
+            if repo_owner and repo_name:
+                comment = format_evidence_comment(webhook_issue)
+                posted = post_github_comment(repo_owner, repo_name, number, comment)
+                if posted:
+                    broadcast_event(LogEvent(
+                        id=str(uuid.uuid4())[:8],
+                        timestamp=time.strftime("%H:%M:%S"),
+                        phase="VERDICT",
+                        message=f"[GITHUB APP] Evidence comment posted to #{number} on {repo_owner}/{repo_name}!"
+                    ))
 
         background_tasks.add_task(run_single)
         return {"status": "queued", "issue_number": number}

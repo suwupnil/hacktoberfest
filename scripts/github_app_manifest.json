@@ -1,0 +1,19 @@
+{
+  "name": "ClaimSentry-Verifier",
+  "url": "https://github.com/suwupnil/hacktoberfest",
+  "hook_attributes": {
+    "url": "https://your-domain.com/api/webhook/github",
+    "active": true
+  },
+  "default_permissions": {
+    "issues": "write",
+    "pull_requests": "write",
+    "contents": "read",
+    "metadata": "read"
+  },
+  "default_events": [
+    "issues",
+    "pull_request"
+  ],
+  "description": "Autonomous air-gapped claim verification bot for Problem 2 (Triage that tests the claims). Tests bug reports, CVEs, PR diffs, and multimodal screenshots/videos with runnable evidence."
+}
